@@ -1,0 +1,1 @@
+alias playlist="find . -type f \( -name '*.flac' -o -name '*.mp3' -o -name '*.m4a' \) -fprint playlist.m3u"

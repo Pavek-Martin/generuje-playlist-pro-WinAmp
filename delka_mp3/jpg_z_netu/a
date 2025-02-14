@@ -1,0 +1,32 @@
+$folder = "M:\Musikk\"
+    $output_file = "M:\Musikk\output.txt"
+
+    Get-ChildItem -Path $folder -Filter *.mp3 | ForEach-Object {
+        $file_path = $_.FullName
+        
+        # This does not work, it gets the length of the MP3-file in bytes.
+        # note: Personally I whould expect this property to be called 'Size'.
+        #$test_duration01 = $_.Length
+        #Write-Host $test_duration01
+        
+        # This does not work, it shows an empty line
+        #$test_duration02 = $_.Duration
+        #Write-Host $test_duration02
+        
+        $shell = New-Object -COMObject Shell.Application
+        
+        $folder = Split-Path $file_path
+        $file = Split-Path $file_path -Leaf
+        $shellfolder = $shell.Namespace($folder)
+        $shellfile = $shellfolder.ParseName($file)
+        # Get the details for this file. We want to display the property 'Length' (=27).
+        $duration = $shellfolder.GetDetailsOf($shellfile, 27);
+        #Write-Host $duration
+        $duration_obj = [TimeSpan]::ParseExact($duration, "hh\:mm\:ss", [System.Globalization.CultureInfo]::InvariantCulture)
+        
+        Add-Content -Path $output_file -Value "$file_path,$($duration_obj.TotalSeconds)"    
+    }
+        
+    # Further reading/sources:
+    #    https://stackoverflow.com/questions/22382010/what-options-are-available-for-shell32-folder-getdetailsof
+    #    https://github.com/matekstatek/get-mp3-duration-in-powershell/blob/main/Get-MP3DurationFromSpecificDirectory.ps1
